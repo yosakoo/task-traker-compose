@@ -11,16 +11,27 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
     restart: unless-stopped
 
   email-sender:
-    image: allbyk/task-traker:email
+    image: allbyk/task-traker-email-sender:latest  
     restart: unless-stopped
-    links:
-      - rabbitmq
     env_file: .env 
     depends_on:
       postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+  scheduler:
+    image: allbyk/scheduler:latest  
+    restart: unless-stopped
+    env_file: .env 
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
         condition: service_healthy
 
   rabbitmq:
@@ -68,8 +79,6 @@ services:
     image: migrate/migrate
     volumes:
       - ./migrations:/migrations
-    links:
-      - postgres
     command: ["-path", "/migrations", "-database", "postgres://$POSTGRES_USER:$POSTGRES_PASSWORD@postgres:5432/task-traker?sslmode=disable", "up"]
     depends_on:
       postgres:
