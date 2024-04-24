@@ -2,9 +2,6 @@ version: "3.8"
 services:
   api:
     image: allbyk/task-traker-api:latest
-    links:
-      - rabbitmq
-      - postgres
     env_file: .env 
     ports:
       - '8080:8080'
